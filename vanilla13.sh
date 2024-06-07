@@ -1,71 +1,77 @@
-#!/bin/bash
+work_dir=$(pwd)
+repS="python3 $work_dir/bin/strRep.py"
+mkdir -p $work_dir/jar_temp
 
-dir=$(pwd)
-repM="python3 $dir/bin/strRep.py"
+jar_util() 
+{
+	cd $dir
+	#binary
+	if [[ $3 == "fw" ]]; then 
+		bak="java -jar $dir/bin/baksmali.jar d --api 33"
+		sma="java -jar $dir/bin/smali.jar a --api 33"
+	else
+		bak="java -jar $dir/bin/baksmali-2.5.2.jar d"
+		sma="java -jar $dir/bin/smali-2.5.2.jar a"
+	fi
 
-get_file_dir() {
-    if [[ $1 ]]; then
-        find $dir/ -name $1
-    else
-        return 0
-    fi
+	if [[ $1 == "d" ]]; then
+		echo -ne "====> Patching $2 : "
+		if [[ -f $dir/framework.jar ]]; then
+			sudo cp $dir/framework.jar $dir/jar_temp
+			sudo chown $(whoami) $dir/jar_temp/$2
+			unzip $dir/jar_temp/$2 -d $dir/jar_temp/$2.out  >/dev/null 2>&1
+			if [[ -d $dir/jar_temp/"$2.out" ]]; then
+				rm -rf $dir/jar_temp/$2
+				for dex in $(find $dir/jar_temp/"$2.out" -maxdepth 1 -name "*dex" ); do
+						if [[ $4 ]]; then
+							if [[ ! "$dex" == *"$4"* ]]; then
+								$bak $dex -o "$dex.out"
+								[[ -d "$dex.out" ]] && rm -rf $dex
+							fi
+						else
+							$bak $dex -o "$dex.out"
+							[[ -d "$dex.out" ]] && rm -rf $dex		
+						fi
+
+				done
+			fi
+		fi
+	else 
+		if [[ $1 == "a" ]]; then 
+			if [[ -d $dir/jar_temp/$2.out ]]; then
+				cd $dir/jar_temp/$2.out
+				for fld in $(find -maxdepth 1 -name "*.out" ); do
+					if [[ $4 ]]; then
+						if [[ ! "$fld" == *"$4"* ]]; then
+							$sma $fld -o $(echo ${fld//.out})
+							[[ -f $(echo ${fld//.out}) ]] && rm -rf $fld
+						fi
+					else 
+						$sma $fld -o $(echo ${fld//.out})
+						[[ -f $(echo ${fld//.out}) ]] && rm -rf $fld	
+					fi
+				done
+				7za a -tzip -mx=0 $dir/jar_temp/$2_notal $dir/jar_temp/$2.out/. >/dev/null 2>&1
+				#zip -r -j -0 $dir/jar_temp/$2_notal $dir/jar_temp/$2.out/.
+				zipalign 4 $dir/jar_temp/$2_notal $dir/jar_temp/$2
+				if [[ -f $dir/jar_temp/$2 ]]; then
+					sudo cp -rf $dir/jar_temp/$2 $dir/module/system/framework
+					final_dir="$dir/module/*"
+					#7za a -tzip "$dir/services_patched_$(date "+%d%m%y").zip" $final_dir
+					echo "Success"
+					rm -rf $dir/jar_temp/$2.out $dir/jar_temp/$2_notal 
+				else
+					echo "Fail"
+				fi
+			fi
+		fi
+	fi
 }
-
-jar_util() {
-    if [[ ! -d $dir/jar_temp ]]; then
-        mkdir $dir/jar_temp
-    fi
-
-    bak="java -jar $dir/bin/baksmali.jar d --api 33"
-    sma="java -jar $dir/bin/smali.jar a --api 33"
-
-    if [[ $1 == "d" ]]; then
-        echo "====> Disassembling $2"
-
-        file_path=$(get_file_dir $2)
-        if [[ $file_path ]]; then
-            cp "$file_path" $dir/jar_temp
-            chown $(whoami) $dir/jar_temp/$2
-            unzip $dir/jar_temp/$2 -d $dir/jar_temp/$2.out >/dev/null 2>&1
-            if [[ -d $dir/jar_temp/"$2.out" ]]; then
-                rm -rf $dir/jar_temp/$2
-                for dex in $(find $dir/jar_temp/"$2.out" -maxdepth 1 -name "*dex" ); do
-                    echo "Disassembling $dex"
-                    $bak $dex -o "$dex.out"
-                    [[ -d "$dex.out" ]] && rm -rf $dex
-                done
-            fi
-        fi
-    elif [[ $1 == "a" ]]; then
-        if [[ -d $dir/jar_temp/$2.out ]]; then
-            cd $dir/jar_temp/$2.out || exit 1
-            for fld in $(find . -maxdepth 1 -name "*.out" ); do
-                echo "Assembling $fld"
-                $sma $fld -o ${fld//.out}
-                [[ -f ${fld//.out} ]] && rm -rf $fld
-            done
-            7za a -tzip -mx=0 $dir/jar_temp/$2_notal $dir/jar_temp/$2.out/. >/dev/null 2>&1
-            zipalign -p -v 4 $dir/jar_temp/$2_notal $dir/jar_temp/$2 >/dev/null 2>&1
-            if [[ -f $dir/jar_temp/$2 ]]; then
-                rm -rf $dir/jar_temp/$2.out $dir/jar_temp/$2_notal
-                echo "Success"
-            else
-                echo "Failed to create $2"
-                return 1
-            fi
-        fi
-    fi
-}
-
 CLASSES4_DEX="$dir/cts13/classes4.dex"
-FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
-CLASSES4_DIR="$TMP_DIR/classes4.out"
-FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
+CLASSES4_DIR="$dir/jar_temp/classes4.out"
+FRAMEWORK_DIR="$dir/jar_temp/framework.jar.out"
 
-mkdir -p "$TMP_DIR"
-
-# Create the framework.out directory if it doesn't exist
 
 # Create the classes4.out directory if it doesn't exist
 if [ ! -d "$CLASSES4_DIR" ]; then
@@ -77,7 +83,7 @@ if [ ! -d "$CLASSES4_DIR" ]; then
 fi
 
 echo "Disassembling framework.jar"
-java -jar $dir/bin/apktool.jar -q d "$FRAMEWORK_JAR" -f -r --only-main-classes --api 32 -o "$FRAMEWORK_DIR"
+jar_util d "framework.jar" fw
 
 echo "Disassembling classes4.dex"
 java -jar $dir/bin/baksmali.jar d "$CLASSES4_DEX" -o "$CLASSES4_DIR"
@@ -118,7 +124,6 @@ if [[ -d "$util_folder" ]]; then
         "PixelPropsUtils\$\$ExternalSyntheticLambda1.smali"
         "AttestationHooks\$\$ExternalSyntheticLambda0.smali"
     )
-    
     for file in "${files_to_copy_to_summert[@]}"; do
         classes4_file=$(find "$CLASSES4_DIR" -name "$file")
         
@@ -134,5 +139,7 @@ else
 fi
 
 echo "Assembling framework.jar"
-java -jar $dir/bin/apktool.jar -q b -c --api 32 --use-aapt2  "$FRAMEWORK_DIR" 
-cp -rf $FRAMEWORK_DIR/dist/framework.jar $dir/module/system/framework
+jar_util a "framework.jar" fw
+
+rm -rf $work_dir/jar_temp
+
