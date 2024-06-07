@@ -1,6 +1,6 @@
-work_dir=$(pwd)
+dir=$(pwd)
 repS="python3 $work_dir/bin/strRep.py"
-mkdir -p $work_dir/jar_temp
+mkdir -p $dir/jar_temp
 
 jar_util() 
 {
