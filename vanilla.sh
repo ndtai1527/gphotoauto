@@ -57,13 +57,13 @@ jar_util() {
     fi
 }
 
+
 CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
-CLASSES4_DIR="$TMP_DIR/classes4.out"
+CLASSES4_DIR="$TMP_DIR/cts14/classes4.out"
 FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
 
-mkdir -p "$TMP_DIR"
 
 # Create the framework.out directory if it doesn't exist
 
@@ -79,8 +79,6 @@ fi
 echo "Disassembling framework.jar"
 jar_util d "framework.jar" fw
 
-echo "Disassembling classes4.dex"
-java -jar $dir/bin/baksmali.jar d "$CLASSES4_DEX" -o "$CLASSES4_DIR"
 
 if [[ ! -d "$CLASSES4_DIR" ]]; then
     echo "Error: Failed to disassemble classes4.dex"
