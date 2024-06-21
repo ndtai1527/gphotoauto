@@ -129,7 +129,7 @@ if [[ -d "$util_folder" ]]; then
     for file in "${files_to_copy_to_summert[@]}"; do
         classes3_file=$(find "$CLASSES3_DIR" -name "$file")
         
-        if [[ -f "$classes4_file" ]]; then
+        if [[ -f "$classes3_file" ]]; then
             echo "Copying $classes3_file to $summert_folder"
             cp "$classes3_file" "$summert_folder"
             cp $chainf/* "$summert_folder"
