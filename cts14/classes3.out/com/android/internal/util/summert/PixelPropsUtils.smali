@@ -1,6 +1,7 @@
-.class public c;
+.class public Lcom/android/internal/util/summert/PixelPropsUtils;
 .super Ljava/lang/Object;
 .source "PixelPropsUtils.java"
+
 
 
 # static fields
