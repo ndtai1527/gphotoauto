@@ -70,7 +70,7 @@ remove_prefix() {
 CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
-CLASSES4_DIR="$TMP_DIR/cts14/classes5.out"
+CLASSES3_DIR="$TMP_DIR/cts14/classes3.out" 
 FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
 chainf="$dir/cts14/chain"
 
@@ -79,10 +79,10 @@ remove_prefix
 
 # Create the framework.out directory if it doesn't exist
 # Create the classes4.out directory if it doesn't exist
-if [ ! -d "$CLASSES4_DIR" ]; then
-    mkdir -p "$CLASSES4_DIR"
+if [ ! -d "$CLASSES3_DIR" ]; then
+    mkdir -p "$CLASSES3_DIR"
     if [ $? -ne 0 ]; then
-        echo "Error: Failed to create directory $CLASSES4_DIR"
+        echo "Error: Failed to create directory $CLASSES3_DIR"
         exit 1
     fi
 fi
@@ -90,7 +90,7 @@ fi
 echo "Disassembling framework.jar"
 jar_util d "framework.jar" fw
 
-if [[ ! -d "$CLASSES4_DIR" ]]; then
+if [[ ! -d "$CLASSES3_DIR" ]]; then
     echo "Error: Failed to disassemble classes4.dex"
     exit 1
 fi
@@ -100,7 +100,7 @@ files_to_copy=("ApplicationPackageManager.smali" "Instrumentation.smali" "Androi
 
 for file in "${files_to_copy[@]}"; do
     framework_file=$(find "$FRAMEWORK_DIR" -name "$(basename $file)")
-    classes4_file=$(find "$CLASSES4_DIR" -name "$(basename $file)")
+    classes4_file=$(find "$CLASSES3_DIR" -name "$(basename $file)")
     
     if [[ -f "$classes4_file" ]]; then
         echo "Copying $classes4_file to $framework_file"
@@ -127,7 +127,7 @@ if [[ -d "$util_folder" ]]; then
     )
     
     for file in "${files_to_copy_to_summert[@]}"; do
-        classes4_file=$(find "$CLASSES4_DIR" -name "$file")
+        classes4_file=$(find "$CLASSES3_DIR" -name "$file")
         
         if [[ -f "$classes4_file" ]]; then
             echo "Copying $classes4_file to $summert_folder"
