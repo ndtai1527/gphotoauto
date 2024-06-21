@@ -16,8 +16,8 @@ jar_util() {
         mkdir $dir/jar_temp
     fi
 
-    bak="java -jar $dir/bin/baksmali.jar d --api 33"
-    sma="java -jar $dir/bin/smali.jar a --api 33"
+    bak="java -jar $dir/bin/baksmali.jar d --api 34"
+    sma="java -jar $dir/bin/smali.jar a --api 34"
 
     if [[ $1 == "d" ]]; then
         echo "====> Disassembling $2"
@@ -57,6 +57,15 @@ jar_util() {
     fi
 }
 
+remove_prefix() {
+    for file in "$chainf"/*; do
+        if [[ -f "$file" && "$file" == *"_1.smali" ]]; then
+            new_file="${file//_1.smali/.smali}"
+            echo "Renaming $file to $new_file"
+            mv "$file" "$new_file"
+        fi
+    done
+}
 
 CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
@@ -65,9 +74,10 @@ CLASSES4_DIR="$TMP_DIR/cts14/classes5.out"
 FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
 chainf="$dir/cts14/chain"
 
+# Remove the _1 prefix from all files in $chainf
+remove_prefix
 
 # Create the framework.out directory if it doesn't exist
-
 # Create the classes4.out directory if it doesn't exist
 if [ ! -d "$CLASSES4_DIR" ]; then
     mkdir -p "$CLASSES4_DIR"
@@ -80,12 +90,10 @@ fi
 echo "Disassembling framework.jar"
 jar_util d "framework.jar" fw
 
-
 if [[ ! -d "$CLASSES4_DIR" ]]; then
     echo "Error: Failed to disassemble classes4.dex"
     exit 1
 fi
-
 
 # Find and copy specific .smali files
 files_to_copy=("ApplicationPackageManager.smali" "Instrumentation.smali" "AndroidKeyStoreSpi.smali")
