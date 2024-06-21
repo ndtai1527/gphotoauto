@@ -70,7 +70,7 @@ remove_prefix() {
 CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
-CLASSES3_DIR="$TMP_DIR/cts14/classes3.out" 
+CLASSES3_DIR="$dir/cts14/classes3.out" 
 FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
 chainf="$dir/cts14/chain"
 
@@ -100,13 +100,13 @@ files_to_copy=("ApplicationPackageManager.smali" "Instrumentation.smali" "Androi
 
 for file in "${files_to_copy[@]}"; do
     framework_file=$(find "$FRAMEWORK_DIR" -name "$(basename $file)")
-    classes4_file=$(find "$CLASSES3_DIR" -name "$(basename $file)")
+    classes3_file=$(find "$CLASSES3_DIR" -name "$(basename $file)")
     
-    if [[ -f "$classes4_file" ]]; then
-        echo "Copying $classes4_file to $framework_file"
-        cp -rf "$classes4_file" "$framework_file"
+    if [[ -f "$classes3_file" ]]; then
+        echo "Copying $classes3_file to $framework_file"
+        cp -rf "$classes3_file" "$framework_file"
     else
-        echo "Error: $classes4_file not found"
+        echo "Error: $classes3_file not found"
     fi
 done
 
@@ -127,14 +127,14 @@ if [[ -d "$util_folder" ]]; then
     )
     
     for file in "${files_to_copy_to_summert[@]}"; do
-        classes4_file=$(find "$CLASSES3_DIR" -name "$file")
+        classes3_file=$(find "$CLASSES3_DIR" -name "$file")
         
         if [[ -f "$classes4_file" ]]; then
-            echo "Copying $classes4_file to $summert_folder"
-            cp "$classes4_file" "$summert_folder"
+            echo "Copying $classes3_file to $summert_folder"
+            cp "$classes3_file" "$summert_folder"
             cp $chainf/* "$summert_folder"
         else
-            echo "Error: $classes4_file not found"
+            echo "Error: $classes3_file not found"
         fi
     done
 else
