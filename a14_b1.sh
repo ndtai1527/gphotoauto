@@ -61,7 +61,7 @@ CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
 CLASSES3_DIR="$dir/cts14/classes3.out" 
-FRAMEWORK_DIR="$dir/framework.jar.out"
+FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
 chainf="$dir/cts14/chain"
 
 # Remove the _1 prefix from all files in $chainf
