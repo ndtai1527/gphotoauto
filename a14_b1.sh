@@ -2,8 +2,6 @@
 
 dir=$(pwd)
 repM="python3 $dir/bin/strRep.py"
-apkeditor="java -jar $dir/bin/apked.jar"
-mkdir $dir/jar_temp
 
 get_file_dir() {
     if [[ $1 ]]; then
@@ -13,42 +11,41 @@ get_file_dir() {
     fi
 }
 
-# jar_util() {
-#     if [[ ! -d $dir/jar_temp ]]; then
-#         mkdir $dir/jar_temp
-#     fi
+jar_util() {
+    if [[ ! -d $dir/jar_temp ]]; then
+        mkdir $dir/jar_temp
+    fi
 
-#     apktool="java -jar $dir/bin/apktool.jar"
-#     apkeditor="java -jar $dir/bin/apked.jar"
+    apktool="java -jar $dir/bin/apktool.jar"
 
-#     if [[ $1 == "d" ]]; then
-#         echo "====> Disassembling $2"
+    if [[ $1 == "d" ]]; then
+        echo "====> Disassembling $2"
 
-#         file_path=$(get_file_dir $2)
-#         if [[ $file_path ]]; then
-#             cp "$file_path" $dir/jar_temp
-#             chown $(whoami) $dir/jar_temp/$2
-#             $apkeditor d -f --api 34 -i $dir/jar_temp/$2.out $dir/jar_temp/$2
-#             if [[ -d $dir/jar_temp/"$2.out" ]]; then
-#                 rm -rf $dir/jar_temp/$2
-#             fi
-#         fi
-#     elif [[ $1 == "a" ]]; then
-#         if [[ -d $dir/jar_temp/$2.out ]]; then
-#             cd $dir/jar_temp/$2.out || exit 1
-#             $apkeditor b -f --api 34 -i $dir/jar_temp/$2 $dir/jar_temp/$2.out
-#             zipalign -p -v 4 $dir/jar_temp/$2 $dir/jar_temp/${2}_aligned.jar >/dev/null 2>&1
-#             mv $dir/jar_temp/${2}_aligned.jar $dir/jar_temp/$2
-#             if [[ -f $dir/jar_temp/$2 ]]; then
-#                 rm -rf $dir/jar_temp/$2.out
-#                 echo "Success"
-#             else
-#                 echo "Failed to create $2"
-#                 return 1
-#             fi
-#         fi
-#     fi
-# }
+        file_path=$(get_file_dir $2)
+        if [[ $file_path ]]; then
+            cp "$file_path" $dir/jar_temp
+            chown $(whoami) $dir/jar_temp/$2
+            $apktool d -f --api 34 -o $dir/jar_temp/$2.out $dir/jar_temp/$2
+            if [[ -d $dir/jar_temp/"$2.out" ]]; then
+                rm -rf $dir/jar_temp/$2
+            fi
+        fi
+    elif [[ $1 == "a" ]]; then
+        if [[ -d $dir/jar_temp/$2.out ]]; then
+            cd $dir/jar_temp/$2.out || exit 1
+            $apktool b --api 34 -o $dir/jar_temp/$2 $dir/jar_temp/$2.out
+            zipalign -p -v 4 $dir/jar_temp/$2 $dir/jar_temp/${2}_aligned.jar >/dev/null 2>&1
+            mv $dir/jar_temp/${2}_aligned.jar $dir/jar_temp/$2
+            if [[ -f $dir/jar_temp/$2 ]]; then
+                rm -rf $dir/jar_temp/$2.out
+                echo "Success"
+            else
+                echo "Failed to create $2"
+                return 1
+            fi
+        fi
+    fi
+}
 
 remove_prefix() {
     for file in "$chainf"/*; do
@@ -64,7 +61,6 @@ CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
 CLASSES3_DIR="$dir/cts14/classes3.out" 
-# FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
 FRAMEWORK_DIR="$dir/framework.jar.out"
 chainf="$dir/cts14/chain"
 
@@ -81,10 +77,10 @@ if [ ! -d "$CLASSES3_DIR" ]; then
     fi
 fi
 
-# echo "Disassembling framework.jar"
-# jar_util d "framework.jar" fw
+echo "Disassembling framework.jar"
+jar_util d "framework.jar" fw
 
-$apkeditor d -f --api 34 -i "framework.jar" -o $dir/framework.jar.out
+
 
 if [[ ! -d "$CLASSES3_DIR" ]]; then
     echo "Error: Failed to disassemble classes4.dex"
@@ -138,8 +134,8 @@ else
 fi
 
 echo "Assembling framework.jar"
-# jar_util a "framework.jar" fw
-$apkeditor b -f --api 34 -i $dir/framework.jar.out -o $dir/jar_temp/framework.jar
+jar_util a "framework.jar" fw
+
 
 # Check if framework.jar exists in the jar_temp directory
 if [ -f $dir/jar_temp/framework.jar ]; then
