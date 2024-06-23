@@ -101,7 +101,7 @@ for file in "${files_to_copy[@]}"; do
 done
 
 # Dynamically search for the util folder
-util_folder=$(find "$FRAMEWORK_DIR" -type d -name "util" | head -n 1)
+util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/internal/util" | head -n 1)
 
 if [[ -d "$util_folder" ]]; then
     echo "Util folder found: $util_folder"
