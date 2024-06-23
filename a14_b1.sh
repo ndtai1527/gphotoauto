@@ -80,8 +80,6 @@ fi
 echo "Disassembling framework.jar"
 jar_util d "framework.jar" fw
 
-
-
 if [[ ! -d "$CLASSES3_DIR" ]]; then
     echo "Error: Failed to disassemble classes4.dex"
     exit 1
@@ -102,9 +100,11 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
-util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/internal/util")
+# Dynamically search for the util folder
+util_folder=$(find "$FRAMEWORK_DIR" -type d -name "util" | head -n 1)
 
 if [[ -d "$util_folder" ]]; then
+    echo "Util folder found: $util_folder"
     summert_folder="$util_folder/summert"
     mkdir -p "$summert_folder"
     
@@ -135,7 +135,6 @@ fi
 
 echo "Assembling framework.jar"
 jar_util a "framework.jar" fw
-
 
 # Check if framework.jar exists in the jar_temp directory
 if [ -f $dir/jar_temp/framework.jar ]; then
