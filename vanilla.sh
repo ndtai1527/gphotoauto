@@ -91,7 +91,7 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
-util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/internal/util")
+util_folder=$(find "$FRAMEWORK_DIR" -type d -path "Â)
 
 if [[ -d "$util_folder" ]]; then
     summert_folder="$util_folder/summert"
