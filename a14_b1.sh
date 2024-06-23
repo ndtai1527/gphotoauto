@@ -33,7 +33,7 @@ jar_util() {
     elif [[ $1 == "a" ]]; then
         if [[ -d $dir/jar_temp/$2.out ]]; then
             cd $dir/jar_temp/$2.out || exit 1
-            $apktool b --api 34 -o $dir/jar_temp/$2 $dir/jar_temp/$2.out
+            $apktool b -f --api 34 -o $dir/jar_temp/$2 $dir/jar_temp/$2.out
             zipalign -p -v 4 $dir/jar_temp/$2 $dir/jar_temp/${2}_aligned.jar >/dev/null 2>&1
             mv $dir/jar_temp/${2}_aligned.jar $dir/jar_temp/$2
             if [[ -f $dir/jar_temp/$2 ]]; then
