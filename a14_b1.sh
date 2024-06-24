@@ -17,7 +17,6 @@ jar_util() {
         mkdir $dir/jar_temp
     fi
 
-    
     if [[ $1 == "d" ]]; then
         echo "====> Disassembling $2"
 
@@ -30,8 +29,8 @@ jar_util() {
     elif [[ $1 == "a" ]]; then
         if [[ -d $dir/jar_temp/$2.out ]]; then
             $apktool b -f --api 34 $dir/jar_temp/$2.out
-            mv $dir/jar_temp/${2}.out/dist/$2 $dir/jar_temp/$2
-            if [[ -f $dir/jar_temp/$2 ]]; then
+            if [[ -f $dir/jar_temp/$2.out/dist/$2 ]]; then
+                mv $dir/jar_temp/$2.out/dist/$2 $dir/jar_temp/$2
                 rm -rf $dir/jar_temp/$2.out
                 echo "Success"
             else
@@ -55,11 +54,8 @@ remove_prefix() {
 CLASSES4_DEX="$dir/cts14/classes4.dex"
 FRAMEWORK_JAR="$dir/framework.jar"
 TMP_DIR="$dir/jar_temp"
-CLASSES4_DIR="$dir/cts14/classes3.out"
+CLASSES4_DIR="$dir/cts14/classes4.out"
 FRAMEWORK_DIR="$TMP_DIR/framework.jar.out"
-
-
-# Create the framework.out directory if it doesn't exist
 
 # Create the classes4.out directory if it doesn't exist
 if [ ! -d "$CLASSES4_DIR" ]; then
@@ -71,14 +67,12 @@ if [ ! -d "$CLASSES4_DIR" ]; then
 fi
 
 echo "Disassembling framework.jar"
-jar_util d "framework.jar" fw
+jar_util d "framework.jar"
 
-
-if [[ ! -d "$CLASSES4_DIR" ]]; then
-    echo "Error: Failed to disassemble classes4.dex"
+if [[ ! -d "$FRAMEWORK_DIR" ]]; then
+    echo "Error: Failed to disassemble framework.jar"
     exit 1
 fi
-
 
 # Find and copy specific .smali files
 files_to_copy=("ApplicationPackageManager.smali" "Instrumentation.smali" "AndroidKeyStoreSpi.smali")
@@ -127,11 +121,11 @@ else
 fi
 
 echo "Assembling framework.jar"
-jar_util a "framework.jar" fw
+jar_util a "framework.jar"
 
 # Check if framework.jar exists in the jar_temp directory
 if [ -f $dir/jar_temp/framework.jar ]; then
     sudo cp -rf $dir/jar_temp/*.jar $dir/module/system/framework
 else
-    echo "Fail to copy framework"
+    echo "Failed to copy framework"
 fi
