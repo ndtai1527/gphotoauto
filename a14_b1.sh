@@ -25,12 +25,11 @@ jar_util() {
         if [[ $file_path ]]; then
             cp "$file_path" $dir/jar_temp
             chown $(whoami) $dir/jar_temp/$2
-            $apktool d -f --api 34 $dir/jar_temp/$2 -o $dir/jar_temp/$2.out $dir/jar_temp/$2
+            $apktool d -f --api 34 $dir/jar_temp/$2 -o $dir/jar_temp/$2.out
         fi
     elif [[ $1 == "a" ]]; then
         if [[ -d $dir/jar_temp/$2.out ]]; then
-            cd $dir/jar_temp/$2.out || exit 1
-            $apktool b -f --api 34 $2.out
+            $apktool b -f --api 34 $dir/jar_temp/$2.out
             mv $dir/jar_temp/${2}.out/dist/$2 $dir/jar_temp/$2
             if [[ -f $dir/jar_temp/$2 ]]; then
                 rm -rf $dir/jar_temp/$2.out
