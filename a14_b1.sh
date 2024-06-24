@@ -2,6 +2,7 @@
 
 dir=$(pwd)
 repM="python3 $dir/bin/strRep.py"
+apktool="java -jar $dir/bin/apktool.jar"
 
 get_file_dir() {
     if [[ $1 ]]; then
@@ -16,8 +17,7 @@ jar_util() {
         mkdir $dir/jar_temp
     fi
 
-    apktool="java -jar $dir/bin/apktool.jar"
-
+    
     if [[ $1 == "d" ]]; then
         echo "====> Disassembling $2"
 
@@ -25,17 +25,13 @@ jar_util() {
         if [[ $file_path ]]; then
             cp "$file_path" $dir/jar_temp
             chown $(whoami) $dir/jar_temp/$2
-            $apktool d -f --api 34 -o $dir/jar_temp/$2.out $dir/jar_temp/$2
-            if [[ -d $dir/jar_temp/"$2.out" ]]; then
-                rm -rf $dir/jar_temp/$2
-            fi
+            $apktool d -f --api 34 $dir/jar_temp/$2 -o $dir/jar_temp/$2.out $dir/jar_temp/$2
         fi
     elif [[ $1 == "a" ]]; then
         if [[ -d $dir/jar_temp/$2.out ]]; then
             cd $dir/jar_temp/$2.out || exit 1
-            $apktool b --api 34 -o $dir/jar_temp/$2 $dir/jar_temp/$2.out
-            zipalign -p -v 4 $dir/jar_temp/$2 $dir/jar_temp/${2}_aligned.jar >/dev/null 2>&1
-            mv $dir/jar_temp/${2}_aligned.jar $dir/jar_temp/$2
+            $apktool b -f --api 34 $2.out
+            mv $dir/jar_temp/${2}.out/dist/$2 $dir/jar_temp/$2
             if [[ -f $dir/jar_temp/$2 ]]; then
                 rm -rf $dir/jar_temp/$2.out
                 echo "Success"
