@@ -29,65 +29,68 @@ repM_func () {
 	fi
 }
 
-jar_util() {
-    cd $dir
-    echo "Inside jar_util, current directory: $(pwd)"
-    
-    if [[ $3 == "fw" ]]; then 
-        bak="java -jar $dir/bin/baksmali-3.0.5.jar d --api 34"
-        sma="java -jar $dir/bin/smali-3.0.5.jar a --api 34"
-    fi
+jar_util() 
+{
+	cd $dir
 
-    if [[ $1 == "d" ]]; then
-        echo "====> Patching $2 : "
-        if [[ -f $dir/framework.jar ]]; then
-            sudo cp $dir/framework.jar $dir/jar_temp/
-            sudo chown $(whoami) $dir/jar_temp/framework.jar
-            unzip $dir/jar_temp/framework.jar -d $dir/jar_temp/framework.jar.out >/dev/null 2>&1
-            if [[ -d $dir/jar_temp/framework.jar.out ]]; then
-                rm -rf $dir/jar_temp/framework.jar
-                for dex in $(find $dir/jar_temp/framework.jar.out -maxdepth 1 -name "*dex"); do
-                    if [[ $4 ]]; then
-                        if [[ ! "$dex" == *"$4"* ]]; then
-                            $bak $dex -o "$dex.out"
-                            [[ -d "$dex.out" ]] && rm -rf $dex
-                        fi
-                    else
-                        $bak $dex -o "$dex.out"
-                        [[ -d "$dex.out" ]] && rm -rf $dex
-                    fi
-                done
-            fi
-        fi
-    else 
-        if [[ $1 == "a" ]]; then 
-            if [[ -d $dir/jar_temp/framework.jar.out ]]; then
-                cd $dir/jar_temp/framework.jar.out
-                echo "Inside jar_util (assemble), current directory: $(pwd)"
-                for fld in $(find -maxdepth 1 -name "*.out"); do
-                    if [[ $4 ]]; then
-                        if [[ ! "$fld" == *"$4"* ]]; then
-                            $sma $fld -o $(echo ${fld//.out})
-                            [[ -f $(echo ${fld//.out}) ]] && rm -rf $fld
-                        fi
-                    else 
-                        $sma $fld -o $(echo ${fld//.out})
-                        [[ -f $(echo ${fld//.out}) ]] && rm -rf $fld    
-                    fi
-                done
-                7za a -tzip -mx=0 $dir/jar_temp/framework_notal $dir/jar_temp/framework.jar.out/. >/dev/null 2>&1
-                zipalign 4 $dir/jar_temp/framework_notal $dir/jar_temp/framework.jar
-                if [[ -f $dir/jar_temp/framework.jar ]]; then
-                    sudo cp -rf $dir/jar_temp/framework.jar $dir/module/system/framework
-                    final_dir="$dir/module/*"
-                    echo "Success"
-                    rm -rf $dir/jar_temp/framework.jar.out $dir/jar_temp/framework_notal 
-                else
-                    echo "Fail"
-                fi
-            fi
-        fi
-    fi
+	if [[ ! -d $dir/jar_temp ]]; then
+		mkdir $dir/jar_temp
+	fi
+
+	bak="java -jar $dir/bin/baksmali-3.0.5.jar d"
+    sma="java -jar $dir/bin/smali-3.0.5.jar a"
+
+
+	if [[ $1 == "d" ]]; then
+		echo -ne "====> Patching $2 : "
+		if [[ $(get_file_dir $2 ) ]]; then
+			sudo cp $(get_file_dir $2 ) $dir/jar_temp
+			sudo chown $(whoami) $dir/jar_temp/$2
+			unzip $dir/jar_temp/$2 -d $dir/jar_temp/$2.out  >/dev/null 2>&1
+			if [[ -d $dir/jar_temp/"$2.out" ]]; then
+				rm -rf $dir/jar_temp/$2
+				for dex in $(sudo find $dir/jar_temp/"$2.out" -maxdepth 1 -name "*dex" ); do
+						if [[ $4 ]]; then
+							if [[ "$dex" != *"$4"* && "$dex" != *"$5"* ]]; then
+								$bak $dex -o "$dex.out"
+								[[ -d "$dex.out" ]] && rm -rf $dex
+							fi
+						else
+							$bak $dex -o "$dex.out"
+							[[ -d "$dex.out" ]] && rm -rf $dex		
+						fi
+
+				done
+			fi
+		fi
+	else 
+		if [[ $1 == "a" ]]; then 
+			if [[ -d $dir/jar_temp/$2.out ]]; then
+				cd $dir/jar_temp/$2.out
+				for fld in $(sudo find -maxdepth 1 -name "*.out" ); do
+					if [[ $4 ]]; then
+						if [[ "$fld" != *"$4"* && "$fld" != *"$5"* ]]; then
+							$sma $fld -o $(echo ${fld//.out}) --api 34
+							[[ -f $(echo ${fld//.out}) ]] && rm -rf $fld
+						fi
+					else 
+						$sma $fld -o $(echo ${fld//.out}) --api 34
+						[[ -f $(echo ${fld//.out}) ]] && rm -rf $fld	
+					fi
+				done
+				7za a -tzip -mx=0 $dir/jar_temp/$2_notal $dir/jar_temp/$2.out/. >/dev/null 2>&1
+				#zip -r -j -0 $dir/jar_temp/$2_notal $dir/jar_temp/$2.out/.
+				$zipalign_sa -p -v 4 $dir/jar_temp/$2_notal $dir/jar_temp/$2  >/dev/null 2>&1
+				if [[ -f $dir/jar_temp/$2 ]]; then
+					rm -rf $dir/jar_temp/$2.out $dir/jar_temp/$2_notal 
+					sudo cp -rf $dir/jar_temp/$2 $(get_file_dir $2) 
+					echo "Succes"
+				else
+					echo "Fail"
+				fi
+			fi
+		fi
+	fi
 }
 
 
