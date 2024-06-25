@@ -110,17 +110,20 @@ if [ ! -d "$CLASSES4_DIR" ]; then
 fi
 
 echo "Disassembling framework.jar"
-jar_util d "framework.jar" 
+jar_util d "framework.jar" fw
 
+# echo "Disassembling classes4.dex"
+# java -jar $work_dir/bin/apktool/baksmali.jar d "$CLASSES4_DEX" -o "$CLASSES4_DIR"
 
-if [[ ! -d "$CLASSES4_DIR" ]]; then
-    echo "Error: Failed to disassemble classes4.dex"
-    exit 1
-fi
+# if [[ ! -d "$CLASSES4_DIR" ]]; then
+#     echo "Error: Failed to disassemble classes4.dex"
+#     exit 1
+# fi
 
 
 # Find and copy specific .smali files
 files_to_copy=("ApplicationPackageManager.smali" "Instrumentation.smali" "AndroidKeyStoreSpi.smali")
+
 
 for file in "${files_to_copy[@]}"; do
     framework_file=$(find "$FRAMEWORK_DIR" -name "$(basename $file)")
@@ -134,7 +137,7 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
-util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/internal/util" | head -n 1)
+util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/com/android/internal/util")
 
 if [[ -d "$util_folder" ]]; then
     summert_folder="$util_folder/summert"
@@ -149,7 +152,6 @@ if [[ -d "$util_folder" ]]; then
         "PixelPropsUtils\$\$ExternalSyntheticLambda1.smali"
         "AttestationHooks\$\$ExternalSyntheticLambda0.smali"
     )
-    
     for file in "${files_to_copy_to_summert[@]}"; do
         classes4_file=$(find "$CLASSES4_DIR" -name "$file")
         
@@ -165,9 +167,8 @@ else
 fi
 
 repM 'getMinimumSignatureSchemeVersionForTargetSdk' true ApkSignatureVerifier.smali
-
 echo "Assembling framework.jar"
-jar_util a "framework.jar" 
+jar_util a "framework.jar" fw
 
 # Check if framework.jar exists in the jar_temp directory
 if [ -f $dir/jar_temp/framework.jar ]; then
