@@ -140,9 +140,9 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
-util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/com/android/internal/util" | head -n 1)
+util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/internal/util" | head -n 1)
 
-if [[ ! -d "$util_folder" ]]; then
+if [[ -d "$util_folder" ]]; then
     summert_folder="$util_folder/summert"
     mkdir -p "$summert_folder"
     
@@ -156,7 +156,7 @@ if [[ ! -d "$util_folder" ]]; then
         "AttestationHooks\$\$ExternalSyntheticLambda0.smali"
     )
     for file in "${files_to_copy_to_summert[@]}"; do
-        classes4_file=$(find "$CLASSES4_DIR" -maxdepth 1 -name "$file")
+        classes4_file=$(find "$CLASSES4_DIR" -name "$file")
         
         if [[ -f "$classes4_file" ]]; then
             echo "Copying $classes4_file to $summert_folder"
@@ -170,6 +170,7 @@ else
 fi
 
 repM_func 'getMinimumSignatureSchemeVersionForTargetSdk' true ApkSignatureVerifier.smali
+
 echo "Assembling framework.jar"
 jar_util a "framework.jar" fw
 
