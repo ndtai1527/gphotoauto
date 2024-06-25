@@ -1,7 +1,8 @@
 #!/bin/bash
 
 dir=$(pwd)
-repM="python3 $dir/bin/strRep.py"
+repS="python3 $dir/bin/strRep.py"
+repM="python3 $dir/bin/strS.py"
 apktool="java -jar $dir/bin/apktool.jar"
 
 get_file_dir() {
