@@ -38,8 +38,8 @@ jar_util()
 		mkdir $dir/jar_temp
 	fi
 
-	bak="java -jar $dir/bin/baksmali-3.0.5.jar d --api 34"
-    sma="java -jar $dir/bin/smali-3.0.5.jar a --api 34"
+	bak="java -jar $dir/bin/baksmali.jar d --api 34"
+    sma="java -jar $dir/bin/smali.jar a --api 34"
 
 
 	if [[ $1 == "d" ]]; then
