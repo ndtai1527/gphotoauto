@@ -7,8 +7,8 @@ jar_util()
 	cd $dir
 	#binary
 	if [[ $3 == "fw" ]]; then 
-		bak="java -jar $dir/bin/baksmali.jar d --api 33"
-		sma="java -jar $dir/bin/smali.jar a --api 33"
+		bak="java -jar $dir/bin/baksmali-3.0.5.jar d --api 33"
+		sma="java -jar $dir/bin/smali-3.0.5.jar a --api 33"
 	fi
 
 	if [[ $1 == "d" ]]; then
