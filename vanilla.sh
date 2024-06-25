@@ -142,7 +142,7 @@ done
 
 util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/com/android/internal/util" | head -n 1)
 
-if [[ -d "$util_folder" ]]; then
+if [[ ! -d "$util_folder" ]]; then
     summert_folder="$util_folder/summert"
     mkdir -p "$summert_folder"
     
