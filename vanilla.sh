@@ -84,7 +84,7 @@ jar_util()
 				$zipalign_sa -p -v 4 $dir/jar_temp/$2_notal $dir/jar_temp/$2  >/dev/null 2>&1
 				if [[ -f $dir/jar_temp/$2 ]]; then
 					rm -rf $dir/jar_temp/$2.out $dir/jar_temp/$2_notal 
-					sudo cp -rf $dir/jar_temp/$2 $(get_file_dir $2) 
+					# sudo cp -rf $dir/jar_temp/$2 $(get_file_dir $2) 
 					echo "Succes"
 				else
 					echo "Fail"
