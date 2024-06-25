@@ -137,7 +137,7 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
-util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/com/android/internal/util")
+util_folder=$(find "$FRAMEWORK_DIR" -maxdepth 1 -type d -path "*/com/android/internal/util")
 
 if [[ -d "$util_folder" ]]; then
     summert_folder="$util_folder/summert"
@@ -153,7 +153,7 @@ if [[ -d "$util_folder" ]]; then
         "AttestationHooks\$\$ExternalSyntheticLambda0.smali"
     )
     for file in "${files_to_copy_to_summert[@]}"; do
-        classes4_file=$(find "$CLASSES4_DIR" -name "$file")
+        classes4_file=$(find "$CLASSES4_DIR" -maxdepth 1 -name "$file")
         
         if [[ -f "$classes4_file" ]]; then
             echo "Copying $classes4_file to $summert_folder"
