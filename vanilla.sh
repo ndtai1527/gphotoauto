@@ -140,7 +140,7 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
-util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/internal/util" | head -n 1)
+util_folder=$(find "$FRAMEWORK_DIR" -type d -path "*/classes5.dex.out/com/android/internal/util" | head -n 1)
 
 if [[ -d "$util_folder" ]]; then
     summert_folder="$util_folder/summert"
