@@ -12,7 +12,7 @@ get_file_dir() {
     fi
 }
 
-repM () {
+repM_func () {
 	if [[ $4 == "r" ]]; then
 		if [[ -f $3 ]]; then
 			$repM $1 $2 $3
@@ -41,12 +41,12 @@ jar_util() {
     if [[ $1 == "d" ]]; then
         echo "====> Patching $2 : "
         if [[ -f $dir/framework.jar ]]; then
-            sudo cp $dir/framework.jar $dir/jar_temp
-            sudo chown $(whoami) $dir/jar_temp/$2
-            unzip $dir/jar_temp/$2 -d $dir/jar_temp/$2.out >/dev/null 2>&1
-            if [[ -d $dir/jar_temp/"$2.out" ]]; then
-                rm -rf $dir/jar_temp/$2
-                for dex in $(find $dir/jar_temp/"$2.out" -maxdepth 1 -name "*dex"); do
+            sudo cp $dir/framework.jar $dir/jar_temp/
+            sudo chown $(whoami) $dir/jar_temp/framework.jar
+            unzip $dir/jar_temp/framework.jar -d $dir/jar_temp/framework.jar.out >/dev/null 2>&1
+            if [[ -d $dir/jar_temp/framework.jar.out ]]; then
+                rm -rf $dir/jar_temp/framework.jar
+                for dex in $(find $dir/jar_temp/framework.jar.out -maxdepth 1 -name "*dex"); do
                     if [[ $4 ]]; then
                         if [[ ! "$dex" == *"$4"* ]]; then
                             $bak $dex -o "$dex.out"
@@ -61,8 +61,8 @@ jar_util() {
         fi
     else 
         if [[ $1 == "a" ]]; then 
-            if [[ -d $dir/jar_temp/$2.out ]]; then
-                cd $dir/jar_temp/$2.out
+            if [[ -d $dir/jar_temp/framework.jar.out ]]; then
+                cd $dir/jar_temp/framework.jar.out
                 echo "Inside jar_util (assemble), current directory: $(pwd)"
                 for fld in $(find -maxdepth 1 -name "*.out"); do
                     if [[ $4 ]]; then
@@ -75,13 +75,13 @@ jar_util() {
                         [[ -f $(echo ${fld//.out}) ]] && rm -rf $fld    
                     fi
                 done
-                7za a -tzip -mx=0 $dir/jar_temp/$2_notal $dir/jar_temp/$2.out/. >/dev/null 2>&1
-                zipalign 4 $dir/jar_temp/$2_notal $dir/jar_temp/$2
-                if [[ -f $dir/jar_temp/$2 ]]; then
-                    sudo cp -rf $dir/jar_temp/$2 $dir/module/system/framework
+                7za a -tzip -mx=0 $dir/jar_temp/framework_notal $dir/jar_temp/framework.jar.out/. >/dev/null 2>&1
+                zipalign 4 $dir/jar_temp/framework_notal $dir/jar_temp/framework.jar
+                if [[ -f $dir/jar_temp/framework.jar ]]; then
+                    sudo cp -rf $dir/jar_temp/framework.jar $dir/module/system/framework
                     final_dir="$dir/module/*"
                     echo "Success"
-                    rm -rf $dir/jar_temp/$2.out $dir/jar_temp/$2_notal 
+                    rm -rf $dir/jar_temp/framework.jar.out $dir/jar_temp/framework_notal 
                 else
                     echo "Fail"
                 fi
@@ -129,11 +129,11 @@ for file in "${files_to_copy[@]}"; do
     framework_file=$(find "$FRAMEWORK_DIR" -name "$(basename $file)")
     classes4_file=$(find "$CLASSES4_DIR" -name "$(basename $file)")
     
-    if [[ -f "$classes4_file" ]]; then
+    if [[ -f "$classes4_file" && -f "$framework_file" ]]; then
         echo "Copying $classes4_file to $framework_file"
         cp -rf "$classes4_file" "$framework_file"
     else
-        echo "Error: $classes4_file not found"
+        echo "Error: $classes4_file or $framework_file not found"
     fi
 done
 
@@ -166,7 +166,7 @@ else
     echo "Error: util folder not found in framework"
 fi
 
-repM 'getMinimumSignatureSchemeVersionForTargetSdk' true ApkSignatureVerifier.smali
+repM_func 'getMinimumSignatureSchemeVersionForTargetSdk' true ApkSignatureVerifier.smali
 echo "Assembling framework.jar"
 jar_util a "framework.jar" fw
 
